@@ -1,0 +1,73 @@
+import requests
+import html
+from tkinter import *
+import random
+# getting questions from trivia api to have random qn
+response=requests.get(url="https://opentdb.com/api.php?amount=10&type=boolean")
+questiondata=response.json()["results"]
+# converting html unescape
+for i in range(0,10):
+    questiondata[i]["question"]=html.unescape(questiondata[i]["question"])
+
+#for generating question
+j=random.randint(0,len(questiondata)-1)
+nq=1
+# setting ui
+window=Tk()
+window.title("QUIZLER")
+window.minsize(600,600)
+window.config(bg="#7FDDC1",padx=20,pady=20)
+score=0
+scoreboard=Label(text=f"score:{score}/10",fg="white",font=("Arial",15,"bold"),bg="#7FDDC1")
+scoreboard.place(x=450,y=5)
+canva=Canvas(height=300,width=500,bg="white")
+canva.place(x=0,y=30)
+x=questiondata[j]["question"]
+qn=canva.create_text(200,100,text=f"Q{nq}){x}",width=400,font=("Arial",20,"bold"))
+ti=PhotoImage(file="images/true.png")
+fi=PhotoImage(file="images/false.png")
+#  variable for storing user answer ua
+ua=bool(1)
+
+# creating function for buttons
+def tbf():
+    global ua
+    ua = "True"
+    scorew()
+def fbf():
+    global ua
+    ua = "False"
+    scorew()
+def scorew():
+    global score
+    global j
+
+    if questiondata[j]["correct_answer"] == ua:
+        canva.config(bg="green")
+        score = score + 1
+        scoreboard.config(text=f"score:{score}/10")
+    else:
+        canva.config(bg="red")
+    window.after(1000, qw)
+
+def qw():
+    global nq
+    nq=nq+1
+    global j
+    questiondata.remove(questiondata[j])
+    try:
+        j = random.randint(0, len(questiondata) - 1)
+        x=questiondata[j]["question"]
+        canva.itemconfig(qn, text=f"Q{nq}){x}")
+        canva.config(bg="white")
+
+    except :
+        canva.itemconfig(qn, text="game over", font=("Arial", 30, "bold"))
+        canva.config(bg="white")
+
+
+tb=Button(image=ti,highlightthickness=0,command=tbf)
+fb=Button(image=fi,highlightthickness=0,command=fbf)
+tb.place(x=0,y=450)
+fb.place(x=400,y=450)
+window.mainloop()
